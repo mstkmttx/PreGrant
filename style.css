@@ -1,10 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@400;700&display=swap');
 
 :root {
-    --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
+    --primary-color: #0F1A23;
+    --accent-color: #00BFA5;
+    --secondary-color: #00E5C0;
+    --text-color: #F5F7FA;
     --bg-color: #f8fafc;
-    --text-color: #1e293b;
     --border-color: #e2e8f0;
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -20,8 +21,10 @@
 body {
     font-family: 'Inter', sans-serif;
     line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: var(--primary-color);
     color: var(--text-color);
-    background-color: var(--bg-color);
 }
 
 .container {
@@ -35,21 +38,21 @@ header {
     margin-bottom: 3rem;
 }
 
-h1 {
-    font-family: 'Merriweather', serif;
+header h1 {
+    color: var(--accent-color);
     font-size: 2.5rem;
-    color: var(--primary-color);
     margin-bottom: 0.5rem;
 }
 
-h2 {
+header h2 {
+    color: var(--secondary-color);
     font-size: 1.5rem;
-    font-weight: 500;
-    color: var(--text-color);
+    font-weight: normal;
 }
 
 .input-section {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
     margin-bottom: 3rem;
 }
@@ -61,94 +64,282 @@ h2 {
 }
 
 label {
-    font-weight: 500;
     font-size: 1.1rem;
+    color: var(--secondary-color);
 }
 
 textarea {
-    width: 100%;
-    height: 200px;
+    height: 150px;
     padding: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
-    font-family: 'Inter', sans-serif;
+    border: 2px solid var(--accent-color);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
     font-size: 1rem;
     resize: vertical;
-    transition: border-color 0.2s;
+    transition: border-color 0.3s ease;
 }
 
 textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
-}
-
-.primary-btn, .secondary-btn {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    font-weight: 500;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(0, 229, 192, 0.2);
 }
 
 .primary-btn {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .primary-btn:hover {
-    background-color: var(--primary-hover);
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
 }
 
-.secondary-btn {
-    background-color: white;
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-}
-
-.secondary-btn:hover {
-    background-color: var(--bg-color);
+.primary-btn:disabled {
+    background-color: #4a5568;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .result-section {
-    background-color: white;
-    border-radius: 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
     padding: 2rem;
-    box-shadow: var(--shadow-md);
-    transition: all var(--animation-duration);
+    margin-top: 3rem;
 }
 
-.result-section:not(.hidden) {
-    animation: slideUp 0.5s ease-out;
+.evaluation-report h2 {
+    color: var(--accent-color);
+    margin-bottom: 2rem;
 }
 
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+.evaluation-report h3 {
+    color: var(--secondary-color);
+    margin-top: 2rem;
+}
+
+.score-breakdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.score-breakdown th,
+.score-breakdown td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.score-breakdown th {
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+.total-score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.secondary-btn {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.secondary-btn:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+
+.loading-indicator {
+    display: inline-block;
+    margin-left: 0.5rem;
 }
 
 .hidden {
     display: none;
 }
 
-.evaluation-report h2 {
-    font-family: 'Merriweather', serif;
-    color: var(--text-color);
-    margin-bottom: 2rem;
+/* Animations */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
 }
 
-.evaluation-report h3 {
-    font-size: 1.25rem;
-    margin: 2rem 0 1rem;
+.slide-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.score-animate {
+    animation: scoreCount 1.5s ease-out forwards;
+}
+
+/* History Panel Styles */
+.history-toggle {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background-color: var(--accent-color);
     color: var(--primary-color);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
-.project-info {
-    background-color: var(--bg-color);
+.history-toggle:hover {
+    background-color: var(--secondary-color);
+    transform: scale(1.1);
+}
+
+.history-panel {
+    position: fixed;
+    right: -400px;
+    top: 0;
+    width: 400px;
+    height: 100vh;
+    background-color: var(--primary-color);
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+    transition: right 0.3s ease;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.history-panel.open {
+    right: 0;
+}
+
+.history-panel h3 {
+    color: var(--accent-color);
+    margin-bottom: 1.5rem;
+}
+
+.history-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
     padding: 1rem;
-    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.history-item h4 {
+    color: var(--secondary-color);
+    margin: 0 0 0.5rem 0;
+}
+
+.history-date {
+    color: var(--text-color);
+    opacity: 0.7;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.history-score {
+    color: var(--accent-color);
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.history-load-btn {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.history-load-btn:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Loading Animation */
+.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 2px solid var(--primary-color);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Project Info */
+.project-info {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 8px;
     margin-bottom: 2rem;
+    border: 1px solid rgba(0, 191, 165, 0.2);
+}
+
+.project-info p {
+    margin: 0.5rem 0;
+}
+
+.project-info strong {
+    color: var(--secondary-color);
+    margin-right: 0.5rem;
 }
 
 table {
@@ -178,23 +369,6 @@ th {
     font-weight: 600;
 }
 
-.total-score {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    text-align: center;
-    margin: 2rem 0;
-    padding: 1rem;
-    border-radius: 1rem;
-    background: linear-gradient(135deg, var(--bg-color), white);
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.3s;
-}
-
-.total-score:hover {
-    transform: scale(1.05);
-}
-
 #recommendationsList {
     list-style-position: inside;
     padding-left: 1rem;
@@ -203,99 +377,6 @@ th {
 #downloadPdfBtn {
     margin-top: 2rem;
     width: 100%;
-}
-
-/* Loading Animation */
-.loading {
-    position: relative;
-    pointer-events: none;
-}
-
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 24px;
-    height: 24px;
-    margin: -12px 0 0 -12px;
-    border: 2px solid var(--primary-color);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Fade In Animation */
-.fade-in {
-    opacity: 0;
-    animation: fadeIn var(--animation-duration) ease-in forwards;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Slide In Animation */
-.slide-in {
-    opacity: 0;
-    animation: slideIn var(--animation-duration) ease-out forwards;
-}
-
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(-20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-/* Score Animation */
-.score-animate {
-    animation: scoreCount 1s ease-out;
-}
-
-@keyframes scoreCount {
-    from { opacity: 0; transform: scale(0.8); }
-    50% { transform: scale(1.1); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-/* History Panel */
-.history-panel {
-    position: fixed;
-    right: -300px;
-    top: 0;
-    width: 300px;
-    height: 100vh;
-    background: white;
-    box-shadow: var(--shadow-md);
-    padding: 2rem;
-    transition: right 0.3s ease-in-out;
-    z-index: 1000;
-}
-
-.history-panel.open {
-    right: 0;
-}
-
-.history-toggle {
-    position: fixed;
-    right: 20px;
-    top: 20px;
-    z-index: 1001;
-    padding: 0.5rem;
-    border-radius: 50%;
-    background: var(--primary-color);
-    color: white;
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.2s;
-}
-
-.history-toggle:hover {
-    transform: scale(1.1);
 }
 
 /* Responsive Design */
@@ -309,3 +390,10 @@ th {
         right: -100%;
     }
 } 
+.logo {
+    width: 400px;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px auto;
+  }
+  
