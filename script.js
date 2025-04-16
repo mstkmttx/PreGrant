@@ -392,172 +392,223 @@ function updateUI(results) {
 // Enhanced PDF generation with custom styling
 function generatePDF(results) {
     try {
-        console.log('Starting PDF generation...', results);
+        console.log('Starting PDF generation...');
         
-        // Initialize jsPDF with portrait orientation
+        // Initialize jsPDF
         const doc = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
             format: 'a4'
         });
 
-        // Set initial position
-        let yPos = 20;
+        // Constants for layout
         const margin = 20;
         const pageWidth = doc.internal.pageSize.getWidth();
         const contentWidth = pageWidth - (margin * 2);
+        let yPos = 20;
 
-        // PDF Color scheme (professional print colors)
+        // Color scheme for PDF (ensuring readability)
         const colors = {
-            primary: '#000000',      // Black for main text
-            accent: '#00635A',       // Dark teal for headers
-            secondary: '#217A6E',    // Medium teal for subheaders
-            background: '#FFFFFF',   // White background
-            muted: '#505050'         // Gray for secondary text
+            text: '#111111',          // Dark text for readability
+            headerBg: '#0F1A23',      // Dark background for header
+            sectionBg: '#00BFA5',     // Teal for section headers
+            tableBg: '#F8F9FA',       // Light gray for table backgrounds
+            muted: '#666666'          // Gray for secondary text
+        };
+
+        // Table column configuration
+        const colWidths = {
+            category: 60,
+            score: 25,
+            comments: contentWidth - 90  // Remaining space for comments
         };
 
         // Helper function for adding wrapped text
-        const addWrappedText = (text, size = 11, color = colors.primary, isBold = false) => {
-            doc.setFontSize(size);
+        const addWrappedText = (text, x, y, maxWidth, fontSize = 11, isBold = false) => {
+            doc.setFontSize(fontSize);
             doc.setFont('helvetica', isBold ? 'bold' : 'normal');
-            doc.setTextColor(color.replace('#', ''));
-            const lines = doc.splitTextToSize(text, contentWidth);
-            doc.text(lines, margin, yPos);
-            return (lines.length * size * 0.352) + 5;
+            const lines = doc.splitTextToSize(text, maxWidth);
+            doc.text(lines, x, y);
+            return lines.length * fontSize * 0.352;
         };
 
-        // Helper function for adding sections with proper spacing
-        const addSection = (title, content, titleSize = 14, contentSize = 11) => {
-            // Add section title
-            yPos += addWrappedText(title, titleSize, colors.accent, true);
-            yPos += 2; // Small gap between title and content
-            
-            // Add content
-            yPos += addWrappedText(content, contentSize, colors.primary);
-            yPos += 5; // Space after section
+        // Title Block
+        doc.setFillColor(colors.headerBg);
+        doc.rect(0, 0, pageWidth, 40, 'F');
 
-            // Check if we need a new page
+        // Report Title
+        doc.setTextColor('#FFFFFF');
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PreGrant Evaluation Report', pageWidth/2, 25, { align: 'center' });
+
+        // Project Details
+        doc.setFontSize(12);
+        doc.text(results.projectName, pageWidth/2, 35, { align: 'center' });
+
+        yPos = 55;
+
+        // Overall Score
+        doc.setFillColor(colors.tableBg);
+        doc.rect(margin, yPos, contentWidth, 20, 'F');
+        doc.setTextColor(colors.text);
+        doc.setFontSize(16);
+        doc.text(`Overall Score: ${results.totalScore}%`, pageWidth/2, yPos + 13, { align: 'center' });
+        yPos += 30;
+
+        // Executive Summary
+        doc.setFillColor(colors.sectionBg);
+        doc.rect(margin, yPos, contentWidth, 10, 'F');
+        doc.setTextColor('#FFFFFF');
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Executive Summary', margin + 5, yPos + 7);
+        yPos += 15;
+
+        // Summary content
+        doc.setTextColor(colors.text);
+        doc.setFont('helvetica', 'normal');
+        yPos += addWrappedText(results.summary, margin, yPos, contentWidth);
+        yPos += 10;
+
+        // Category Score Breakdown Table
+        doc.setFillColor(colors.sectionBg);
+        doc.rect(margin, yPos, contentWidth, 10, 'F');
+        doc.setTextColor('#FFFFFF');
+        doc.setFont('helvetica', 'bold');
+        doc.text('Category Score Breakdown', margin + 5, yPos + 7);
+        yPos += 15;
+
+        // Table headers
+        doc.setFillColor(colors.tableBg);
+        doc.rect(margin, yPos, contentWidth, 10, 'F');
+        doc.setTextColor(colors.text);
+        doc.setFontSize(11);
+        
+        // Header cells
+        const headerY = yPos + 7;
+        doc.text('Category', margin + 5, headerY);
+        doc.text('Score', margin + colWidths.category + (colWidths.score/2), headerY, { align: 'center' });
+        doc.text('Assessment', margin + colWidths.category + colWidths.score + 5, headerY);
+        yPos += 15;
+
+        // Table rows
+        results.scores.forEach((score, index) => {
+            const rowHeight = 12;
+            const startY = yPos;
+
+            // Check for page break
             if (yPos > doc.internal.pageSize.getHeight() - 40) {
                 doc.addPage();
                 yPos = 20;
             }
-        };
 
-        // Add header with styling
-        doc.setFillColor(colors.accent.replace('#', ''));
-        doc.rect(0, 0, pageWidth, 35, 'F');
-        
-        // Header text
-        doc.setTextColor('#FFFFFF');
-        doc.setFontSize(24);
-        doc.setFont('helvetica', 'bold');
-        doc.text('PreGrant Evaluation Report', margin, 25);
+            // Row background
+            if (index % 2 === 0) {
+                doc.setFillColor(colors.tableBg);
+                doc.rect(margin, yPos - 4, contentWidth, rowHeight, 'F');
+            }
 
-        yPos = 50; // Reset position after header
+            // Category name
+            doc.setTextColor(colors.text);
+            doc.setFont('helvetica', 'bold');
+            addWrappedText(score.criteria, margin + 5, yPos + 4, colWidths.category - 5);
 
-        // Project Information Box
-        doc.setDrawColor(colors.accent.replace('#', ''));
-        doc.setLineWidth(0.5);
-        doc.rect(margin, yPos - 5, contentWidth, 25);
-        
-        // Project details
-        doc.setFontSize(12);
-        doc.setTextColor(colors.primary.replace('#', ''));
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Project: ${results.projectName}`, margin + 5, yPos + 5);
-        doc.text(`Grant: ${results.grantName}`, margin + 5, yPos + 15);
-        
-        yPos += 30; // Move past the box
+            // Score (centered in its column)
+            const scoreX = margin + colWidths.category + (colWidths.score/2);
+            doc.text(`${score.score}/10`, scoreX, yPos + 4, { align: 'center' });
 
-        // Score Overview Box
-        doc.setFillColor('#F8F9FA');
-        doc.rect(margin, yPos, contentWidth, 20, 'F');
-        doc.setFontSize(16);
-        doc.setTextColor(colors.accent.replace('#', ''));
-        doc.text(`Overall Score: ${results.totalScore}%`, margin + 5, yPos + 13);
-        
-        yPos += 30;
+            // Comments
+            doc.setFont('helvetica', 'normal');
+            const commentHeight = addWrappedText(
+                score.comments,
+                margin + colWidths.category + colWidths.score + 5,
+                yPos + 4,
+                colWidths.comments
+            );
 
-        // Main content sections
-        addSection('Executive Summary', results.summary);
+            yPos += Math.max(rowHeight, commentHeight + 8);
+        });
 
-        // Score Breakdown Table
-        yPos += 10;
-        doc.setFillColor('#F8F9FA');
+        // Innovation Analysis
+        yPos += 5;
+        doc.setFillColor(colors.sectionBg);
         doc.rect(margin, yPos, contentWidth, 10, 'F');
-        doc.setTextColor(colors.accent.replace('#', ''));
-        doc.setFontSize(14);
+        doc.setTextColor('#FFFFFF');
         doc.setFont('helvetica', 'bold');
-        doc.text('Category Score Breakdown', margin + 5, yPos + 7);
-        yPos += 20;
+        doc.text('Innovation Analysis', margin + 5, yPos + 7);
+        yPos += 15;
 
-        // Process each score with improved formatting
-        results.scores.forEach((score, index) => {
-            // Check for page break
-            if (yPos > doc.internal.pageSize.getHeight() - 60) {
+        doc.setTextColor(colors.text);
+        doc.setFont('helvetica', 'normal');
+        yPos += addWrappedText(results.innovationAnalysis, margin, yPos, contentWidth);
+
+        // Reviewer Feedback
+        yPos += 10;
+        doc.setFillColor(colors.sectionBg);
+        doc.rect(margin, yPos, contentWidth, 10, 'F');
+        doc.setTextColor('#FFFFFF');
+        doc.setFont('helvetica', 'bold');
+        doc.text('Reviewer Feedback', margin + 5, yPos + 7);
+        yPos += 15;
+
+        doc.setTextColor(colors.text);
+        doc.setFont('helvetica', 'normal');
+        yPos += addWrappedText(results.reviewerFeedback, margin, yPos, contentWidth);
+
+        // Recommendations
+        yPos += 10;
+        doc.setFillColor(colors.sectionBg);
+        doc.rect(margin, yPos, contentWidth, 10, 'F');
+        doc.setTextColor('#FFFFFF');
+        doc.setFont('helvetica', 'bold');
+        doc.text('Key Recommendations', margin + 5, yPos + 7);
+        yPos += 15;
+
+        // Numbered recommendations
+        doc.setTextColor(colors.text);
+        results.recommendations.forEach((rec, index) => {
+            if (yPos > doc.internal.pageSize.getHeight() - 30) {
                 doc.addPage();
                 yPos = 20;
             }
-
-            // Category header with score
-            doc.setFontSize(12);
+            const bulletPoint = `${index + 1}.`;
             doc.setFont('helvetica', 'bold');
-            doc.setTextColor(colors.accent.replace('#', ''));
-            
-            // Draw category background
-            if (index % 2 === 0) {
-                doc.setFillColor('#F8F9FA');
-                doc.rect(margin, yPos - 5, contentWidth, 15, 'F');
-            }
-            
-            // Category name (left-aligned)
-            doc.text(score.criteria, margin + 5, yPos + 5);
-            
-            // Score (right-aligned)
-            const scoreText = `${score.score}/10`;
-            const scoreWidth = doc.getStringUnitWidth(scoreText) * 12 / doc.internal.scaleFactor;
-            doc.text(scoreText, pageWidth - margin - scoreWidth - 5, yPos + 5);
-            
-            yPos += 15;
-
-            // Category feedback (normal text, slightly indented)
+            doc.text(bulletPoint, margin + 5, yPos + 4);
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
-            doc.setTextColor(colors.primary.replace('#', ''));
-            
-            const commentLines = doc.splitTextToSize(score.comments, contentWidth - 10);
-            doc.text(commentLines, margin + 5, yPos);
-            
-            // Calculate space needed for comments and add padding
-            yPos += (commentLines.length * 11 * 0.352) + 15;
+            yPos += addWrappedText(rec, margin + 15, yPos + 4, contentWidth - 15);
+            yPos += 5;
         });
 
-        // Detailed Analysis Sections
-        addSection('Innovation Analysis', results.innovationAnalysis);
-        addSection('Expert Review', results.reviewerFeedback);
-
-        // Recommendations
+        // Final Assessment (reduced spacing)
         yPos += 5;
-        addSection('Key Recommendations', '');
-        results.recommendations.forEach((rec, index) => {
-            yPos += addWrappedText(`${index + 1}. ${rec}`, 11, colors.primary);
-        });
+        doc.setFillColor(colors.sectionBg);
+        doc.rect(margin, yPos, contentWidth, 10, 'F');
+        doc.setTextColor('#FFFFFF');
+        doc.setFont('helvetica', 'bold');
+        doc.text('Final Assessment', margin + 5, yPos + 7);
+        yPos += 15;
 
-        // Final Assessment
-        yPos += 10;
-        addSection('Final Assessment', results.finalAssessment);
+        doc.setTextColor(colors.text);
+        doc.setFont('helvetica', 'normal');
+        addWrappedText(results.finalAssessment, margin, yPos, contentWidth);
 
-        // Footer
-        const footerY = doc.internal.pageSize.getHeight() - 15;
-        doc.setDrawColor(colors.accent.replace('#', ''));
-        doc.setLineWidth(0.5);
-        doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
-        
-        doc.setFontSize(9);
-        doc.setTextColor(colors.muted.replace('#', ''));
-        const today = new Date().toLocaleDateString();
-        doc.text(`Generated by PreGrant AI Evaluation System | ${today}`, margin, footerY);
-        doc.text('Page ' + doc.internal.getCurrentPageInfo().pageNumber, pageWidth - margin - 20, footerY);
+        // Footer on each page
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            const footerY = doc.internal.pageSize.getHeight() - 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(colors.muted);
+            const dateStr = new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            doc.text(`PreGrant Evaluation Report - Page ${i} of ${pageCount}`, margin, footerY);
+            doc.text(dateStr, pageWidth - margin, footerY, { align: 'right' });
+        }
 
         // Save the PDF
         const filename = `PreGrant_Evaluation_${results.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
