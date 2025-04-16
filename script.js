@@ -482,42 +482,54 @@ function generatePDF(results) {
         addSection('Executive Summary', results.summary);
 
         // Score Breakdown Table
-        yPos += 5;
+        yPos += 10;
         doc.setFillColor('#F8F9FA');
         doc.rect(margin, yPos, contentWidth, 10, 'F');
         doc.setTextColor(colors.accent.replace('#', ''));
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
-        doc.text('Evaluation Criteria', margin + 5, yPos + 7);
-        yPos += 15;
+        doc.text('Category Score Breakdown', margin + 5, yPos + 7);
+        yPos += 20;
 
-        // Table headers
-        const tableHeaders = ['Criteria', 'Score', 'Assessment'];
-        const colWidths = [50, 20, contentWidth - 70];
-        
+        // Process each score with improved formatting
         results.scores.forEach((score, index) => {
-            if (yPos > doc.internal.pageSize.getHeight() - 40) {
+            // Check for page break
+            if (yPos > doc.internal.pageSize.getHeight() - 60) {
                 doc.addPage();
                 yPos = 20;
             }
 
-            // Alternate row backgrounds
+            // Category header with score
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(colors.accent.replace('#', ''));
+            
+            // Draw category background
             if (index % 2 === 0) {
                 doc.setFillColor('#F8F9FA');
-                doc.rect(margin, yPos - 5, contentWidth, 20, 'F');
+                doc.rect(margin, yPos - 5, contentWidth, 15, 'F');
             }
-
-            doc.setTextColor(colors.primary.replace('#', ''));
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'bold');
+            
+            // Category name (left-aligned)
             doc.text(score.criteria, margin + 5, yPos + 5);
-            doc.text(`${score.score}/10`, margin + 55, yPos + 5);
             
+            // Score (right-aligned)
+            const scoreText = `${score.score}/10`;
+            const scoreWidth = doc.getStringUnitWidth(scoreText) * 12 / doc.internal.scaleFactor;
+            doc.text(scoreText, pageWidth - margin - scoreWidth - 5, yPos + 5);
+            
+            yPos += 15;
+
+            // Category feedback (normal text, slightly indented)
             doc.setFont('helvetica', 'normal');
-            const commentLines = doc.splitTextToSize(score.comments, colWidths[2]);
-            doc.text(commentLines, margin + 80, yPos + 5);
+            doc.setFontSize(11);
+            doc.setTextColor(colors.primary.replace('#', ''));
             
-            yPos += Math.max(20, (commentLines.length * 12 * 0.352) + 10);
+            const commentLines = doc.splitTextToSize(score.comments, contentWidth - 10);
+            doc.text(commentLines, margin + 5, yPos);
+            
+            // Calculate space needed for comments and add padding
+            yPos += (commentLines.length * 11 * 0.352) + 15;
         });
 
         // Detailed Analysis Sections
