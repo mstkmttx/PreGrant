@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://api.groq.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline';">
+    <title>PreGrant - Grant Win Probability Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PreGrant</h1>
+            <h2>Grant Win Probability Calculator</h2>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="input-group fade-in">
+                    <label for="grantCall">Grant Call Description</label>
+                    <textarea id="grantCall" placeholder="Paste the official grant call text here..."></textarea>
+                </div>
+
+                <div class="input-group fade-in" style="animation-delay: 0.2s;">
+                    <label for="projectDesc">Project Description</label>
+                    <textarea id="projectDesc" placeholder="Paste your project details or proposal idea here..."></textarea>
+                </div>
+
+                <button id="analyzeBtn" class="primary-btn fade-in" style="animation-delay: 0.4s;">
+                    <span class="btn-text">Analyze Grant Fit</span>
+                    <span class="loading-indicator hidden">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
+            </section>
+
+            <section id="resultContainer" class="result-section hidden">
+                <div class="evaluation-report">
+                    <h2>PreGrant Evaluation Suite – Grant Readiness & Innovation Alignment Assessment</h2>
+                    
+                    <div class="project-info slide-in">
+                        <p><strong>Project Name:</strong> <span id="projectName">Untitled Project</span></p>
+                        <p><strong>Grant Call:</strong> <span id="grantCallName">Unknown Grant</span></p>
+                    </div>
+
+                    <div class="evaluation-summary slide-in" style="animation-delay: 0.1s;">
+                        <h3>🟢 Evaluation Summary</h3>
+                        <p id="evaluationSummary"></p>
+                    </div>
+
+                    <div class="score-breakdown slide-in" style="animation-delay: 0.2s;">
+                        <h3>📊 Category Score Breakdown</h3>
+                        <table id="scoreTable">
+                            <thead>
+                                <tr>
+                                    <th>Criteria</th>
+                                    <th>Score (out of 10)</th>
+                                    <th>Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scoreTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="innovation-analysis slide-in" style="animation-delay: 0.3s;">
+                        <h3>💡 Innovation Analysis</h3>
+                        <p id="innovationAnalysis"></p>
+                    </div>
+
+                    <div class="reviewer-feedback slide-in" style="animation-delay: 0.4s;">
+                        <h3>🧠 Reviewer Feedback</h3>
+                        <p id="reviewerFeedback"></p>
+                    </div>
+
+                    <div class="recommendations slide-in" style="animation-delay: 0.5s;">
+                        <h3>🛠 Recommendations</h3>
+                        <ul id="recommendationsList"></ul>
+                    </div>
+
+                    <div class="final-assessment slide-in" style="animation-delay: 0.6s;">
+                        <h3>📈 Final Assessment</h3>
+                        <p id="finalAssessment"></p>
+                        <div class="total-score score-animate">
+                            <span id="totalScore">0%</span>
+                        </div>
+                    </div>
+
+                    <button id="downloadPdfBtn" class="secondary-btn slide-in" style="animation-delay: 0.7s;">
+                        <i class="fas fa-file-pdf"></i> Download PDF Report
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- History Panel -->
+    <button class="history-toggle" id="historyToggle">
+        <i class="fas fa-history"></i>
+    </button>
+    
+    <div class="history-panel" id="historyPanel">
+        <h3>Previous Evaluations</h3>
+        <div id="evaluationHistory"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
