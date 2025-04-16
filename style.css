@@ -342,30 +342,36 @@ textarea:focus {
     margin-right: 0.5rem;
 }
 
+/* Table Styles */
 table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     margin: 1rem 0;
-    border-radius: 0.5rem;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
 }
 
 th, td {
     padding: 1rem;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+tr {
+    transition: all 0.3s ease;
 }
 
 tr:hover td {
-    background-color: var(--bg-color);
+    transform: scale(1.01);
+    box-shadow: 0 0 15px rgba(0, 191, 165, 0.1);
+    background-color: rgba(0, 191, 165, 0.05);
 }
 
 th {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: rgba(0, 191, 165, 0.1);
+    color: var(--secondary-color);
     font-weight: 600;
 }
 
@@ -396,4 +402,44 @@ th {
     display: block;
     margin: 0 auto 10px auto;
   }
+  
+/* Result Section Hover Effects */
+.evaluation-report p, 
+.evaluation-report li,
+.project-info p,
+.evaluation-summary p,
+.innovation-analysis p,
+.reviewer-feedback p,
+.recommendations li,
+.final-assessment p {
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.evaluation-report p:hover, 
+.evaluation-report li:hover,
+.project-info p:hover,
+.evaluation-summary p:hover,
+.innovation-analysis p:hover,
+.reviewer-feedback p:hover,
+.recommendations li:hover,
+.final-assessment p:hover {
+    transform: scale(1.01);
+    box-shadow: 0 0 20px rgba(0, 191, 165, 0.1);
+    background-color: rgba(0, 191, 165, 0.05);
+}
+
+/* Section Headers Hover Effect */
+.evaluation-report h2:hover,
+.evaluation-report h3:hover {
+    transform: scale(1.02);
+    text-shadow: 0 0 10px rgba(0, 229, 192, 0.3);
+}
+
+/* Total Score Hover Effect */
+.total-score:hover {
+    transform: scale(1.05);
+    text-shadow: 0 0 15px rgba(0, 191, 165, 0.4);
+}
   
