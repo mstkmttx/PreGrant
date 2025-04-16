@@ -65,7 +65,7 @@ function detectRelevantCategories(text) {
 
 // AI Prompt template
 function generatePrompt(grantCall, projectDesc, relevantCategories) {
-    return `You are an expert grant evaluator. Analyze the following grant proposal and provide a structured evaluation.
+    return `You are an expert grant evaluator with extensive experience in research, innovation, and funding assessment. Provide a comprehensive and detailed evaluation of the following grant proposal, offering specific insights and actionable recommendations.
 
 GRANT CALL:
 ${grantCall}
@@ -73,31 +73,78 @@ ${grantCall}
 PROJECT DESCRIPTION:
 ${projectDesc}
 
-Evaluate the project considering these aspects:
-1. Overall alignment with grant objectives
-2. Innovation and uniqueness
-3. Feasibility and implementation
-4. Potential impact
-${relevantCategories.map(cat => `5. ${cat.name}: ${cat.description}`).join('\n')}
+Conduct a thorough analysis considering these key dimensions:
 
-Provide a JSON response with:
+1. Strategic Alignment (0-10):
+- How well does the project align with the grant's objectives?
+- What specific aspects demonstrate strong/weak alignment?
+- Are there any gaps between the project goals and grant requirements?
+
+2. Innovation & Impact (0-10):
+- Evaluate the uniqueness and novelty of the proposed approach
+- Assess the potential for breakthrough outcomes
+- Consider both short-term and long-term impact potential
+- Analyze the competitive advantage and market positioning
+
+3. Methodology & Implementation (0-10):
+- Evaluate the technical feasibility and approach
+- Assess resource allocation and timeline realism
+- Consider risk management and mitigation strategies
+- Examine the team's capability and expertise
+
+4. Sustainability & Scalability (0-10):
+- Assess long-term viability and growth potential
+- Evaluate the scaling strategy and market opportunity
+- Consider financial sustainability beyond the grant period
+- Analyze potential partnerships and ecosystem engagement
+
+${relevantCategories.map(cat => `5. ${cat.name} (0-10):
+- ${cat.description}
+- Evaluate specific strengths and weaknesses
+- Provide detailed recommendations for improvement
+`).join('\n')}
+
+Provide a JSON response with the following detailed sections:
+
 {
-    "projectName": "Extract from first line or most relevant title",
-    "grantName": "Extract from grant call",
-    "summary": "2-3 sentences overall evaluation",
+    "projectName": "Extract or synthesize an appropriate project name",
+    "grantName": "Extract or synthesize the grant program name",
+    "summary": "Provide a comprehensive 3-4 paragraph evaluation summary that captures the key strengths, weaknesses, and overall assessment. Include specific examples and detailed observations. Address both the potential impact and any critical concerns.",
     "scores": [
         {
             "criteria": "string",
             "score": number (0-10),
-            "comments": "string"
+            "comments": "Provide detailed 2-3 paragraph analysis for each criteria, including specific examples, potential improvements, and comparative assessment against industry standards or similar projects"
         }
     ],
-    "innovationAnalysis": "string",
-    "reviewerFeedback": "string",
-    "recommendations": ["string"],
-    "finalAssessment": "string",
-    "totalScore": number (0-100)
-}`;
+    "innovationAnalysis": "Deliver a thorough 3-4 paragraph analysis of the project's innovative aspects, including: 
+    - Detailed assessment of technological or methodological novelty
+    - Comparison with existing solutions or approaches
+    - Analysis of potential market impact and competitive advantage
+    - Evaluation of innovation sustainability and future development potential",
+    "reviewerFeedback": "Provide comprehensive 3-4 paragraph professional feedback covering:
+    - Detailed strengths and areas of excellence
+    - Specific areas requiring improvement or clarification
+    - Strategic recommendations for enhancing the proposal
+    - Risk assessment and mitigation suggestions
+    - Implementation considerations and critical success factors",
+    "recommendations": [
+        "Provide 6-8 detailed, actionable recommendations that are:
+        - Specific and implementable
+        - Prioritized by importance
+        - Linked to evaluation criteria
+        - Forward-looking and strategic"
+    ],
+    "finalAssessment": "Deliver a comprehensive 2-3 paragraph conclusion that:
+    - Synthesizes the overall evaluation
+    - Highlights key differentiators
+    - Provides a clear funding recommendation
+    - Outlines critical success factors
+    - Addresses potential challenges and opportunities",
+    "totalScore": "Calculate a weighted average score (0-100) based on all evaluation criteria"
+}
+
+Ensure each section provides specific, actionable insights and maintains a professional, constructive tone throughout the evaluation. Focus on both current strengths and potential for improvement.`;
 }
 
 // Test API connection
@@ -360,81 +407,145 @@ function generatePDF(results) {
         const pageWidth = doc.internal.pageSize.getWidth();
         const contentWidth = pageWidth - (margin * 2);
 
+        // PDF Color scheme (professional print colors)
+        const colors = {
+            primary: '#000000',      // Black for main text
+            accent: '#00635A',       // Dark teal for headers
+            secondary: '#217A6E',    // Medium teal for subheaders
+            background: '#FFFFFF',   // White background
+            muted: '#505050'         // Gray for secondary text
+        };
+
         // Helper function for adding wrapped text
-        const addWrappedText = (text, size = 12, isBold = false) => {
+        const addWrappedText = (text, size = 11, color = colors.primary, isBold = false) => {
             doc.setFontSize(size);
             doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+            doc.setTextColor(color.replace('#', ''));
             const lines = doc.splitTextToSize(text, contentWidth);
             doc.text(lines, margin, yPos);
-            yPos += (lines.length * size * 0.352) + 5;
+            return (lines.length * size * 0.352) + 5;
+        };
+
+        // Helper function for adding sections with proper spacing
+        const addSection = (title, content, titleSize = 14, contentSize = 11) => {
+            // Add section title
+            yPos += addWrappedText(title, titleSize, colors.accent, true);
+            yPos += 2; // Small gap between title and content
+            
+            // Add content
+            yPos += addWrappedText(content, contentSize, colors.primary);
+            yPos += 5; // Space after section
+
+            // Check if we need a new page
+            if (yPos > doc.internal.pageSize.getHeight() - 40) {
+                doc.addPage();
+                yPos = 20;
+            }
         };
 
         // Add header with styling
-        doc.setFillColor(37, 99, 235); // Primary blue color
-        doc.rect(0, 0, pageWidth, 40, 'F');
-        doc.setTextColor(255, 255, 255);
-        addWrappedText('PreGrant Evaluation Report', 24, true);
-        addWrappedText('Grant Readiness & Innovation Alignment Assessment', 16);
+        doc.setFillColor(colors.accent.replace('#', ''));
+        doc.rect(0, 0, pageWidth, 35, 'F');
+        
+        // Header text
+        doc.setTextColor('#FFFFFF');
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PreGrant Evaluation Report', margin, 25);
 
-        // Reset text color for body
-        doc.setTextColor(0, 0, 0);
-        yPos += 10;
+        yPos = 50; // Reset position after header
 
-        // Project Information
-        addWrappedText(`Project Name: ${results.projectName}`, 14, true);
-        addWrappedText(`Grant Call: ${results.grantName}`, 14, true);
+        // Project Information Box
+        doc.setDrawColor(colors.accent.replace('#', ''));
+        doc.setLineWidth(0.5);
+        doc.rect(margin, yPos - 5, contentWidth, 25);
+        
+        // Project details
+        doc.setFontSize(12);
+        doc.setTextColor(colors.primary.replace('#', ''));
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Project: ${results.projectName}`, margin + 5, yPos + 5);
+        doc.text(`Grant: ${results.grantName}`, margin + 5, yPos + 15);
+        
+        yPos += 30; // Move past the box
+
+        // Score Overview Box
+        doc.setFillColor('#F8F9FA');
+        doc.rect(margin, yPos, contentWidth, 20, 'F');
+        doc.setFontSize(16);
+        doc.setTextColor(colors.accent.replace('#', ''));
+        doc.text(`Overall Score: ${results.totalScore}%`, margin + 5, yPos + 13);
+        
+        yPos += 30;
+
+        // Main content sections
+        addSection('Executive Summary', results.summary);
+
+        // Score Breakdown Table
         yPos += 5;
+        doc.setFillColor('#F8F9FA');
+        doc.rect(margin, yPos, contentWidth, 10, 'F');
+        doc.setTextColor(colors.accent.replace('#', ''));
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Evaluation Criteria', margin + 5, yPos + 7);
+        yPos += 15;
 
-        // Evaluation Summary
-        addWrappedText('Evaluation Summary', 16, true);
-        addWrappedText(results.summary);
-        yPos += 5;
+        // Table headers
+        const tableHeaders = ['Criteria', 'Score', 'Assessment'];
+        const colWidths = [50, 20, contentWidth - 70];
+        
+        results.scores.forEach((score, index) => {
+            if (yPos > doc.internal.pageSize.getHeight() - 40) {
+                doc.addPage();
+                yPos = 20;
+            }
 
-        // Score Breakdown
-        addWrappedText('Category Score Breakdown', 16, true);
-        results.scores.forEach(score => {
-            addWrappedText(`${score.criteria}: ${score.score}/10`, 12, true);
-            addWrappedText(score.comments);
+            // Alternate row backgrounds
+            if (index % 2 === 0) {
+                doc.setFillColor('#F8F9FA');
+                doc.rect(margin, yPos - 5, contentWidth, 20, 'F');
+            }
+
+            doc.setTextColor(colors.primary.replace('#', ''));
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text(score.criteria, margin + 5, yPos + 5);
+            doc.text(`${score.score}/10`, margin + 55, yPos + 5);
+            
+            doc.setFont('helvetica', 'normal');
+            const commentLines = doc.splitTextToSize(score.comments, colWidths[2]);
+            doc.text(commentLines, margin + 80, yPos + 5);
+            
+            yPos += Math.max(20, (commentLines.length * 12 * 0.352) + 10);
         });
-        yPos += 5;
 
-        // Check if we need a new page
-        if (yPos > doc.internal.pageSize.getHeight() - 60) {
-            doc.addPage();
-            yPos = 20;
-        }
-
-        // Innovation Analysis
-        addWrappedText('Innovation Analysis', 16, true);
-        addWrappedText(results.innovationAnalysis);
-        yPos += 5;
-
-        // Reviewer Feedback
-        addWrappedText('Reviewer Feedback', 16, true);
-        addWrappedText(results.reviewerFeedback);
-        yPos += 5;
+        // Detailed Analysis Sections
+        addSection('Innovation Analysis', results.innovationAnalysis);
+        addSection('Expert Review', results.reviewerFeedback);
 
         // Recommendations
-        addWrappedText('Recommendations', 16, true);
-        results.recommendations.forEach((rec, index) => {
-            addWrappedText(`${index + 1}. ${rec}`);
-        });
         yPos += 5;
+        addSection('Key Recommendations', '');
+        results.recommendations.forEach((rec, index) => {
+            yPos += addWrappedText(`${index + 1}. ${rec}`, 11, colors.primary);
+        });
 
         // Final Assessment
-        addWrappedText('Final Assessment', 16, true);
-        addWrappedText(results.finalAssessment);
-        addWrappedText(`Total Score: ${results.totalScore}%`, 18, true);
+        yPos += 10;
+        addSection('Final Assessment', results.finalAssessment);
 
-        // Add footer
+        // Footer
         const footerY = doc.internal.pageSize.getHeight() - 15;
-        doc.setDrawColor(37, 99, 235);
+        doc.setDrawColor(colors.accent.replace('#', ''));
         doc.setLineWidth(0.5);
         doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
         
-        doc.setFontSize(10);
+        doc.setFontSize(9);
+        doc.setTextColor(colors.muted.replace('#', ''));
         const today = new Date().toLocaleDateString();
-        doc.text(`Evaluator: AI-Powered Strategic Review | Date: ${today}`, margin, footerY);
+        doc.text(`Generated by PreGrant AI Evaluation System | ${today}`, margin, footerY);
+        doc.text('Page ' + doc.internal.getCurrentPageInfo().pageNumber, pageWidth - margin - 20, footerY);
 
         // Save the PDF
         const filename = `PreGrant_Evaluation_${results.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
